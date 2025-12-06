@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML学习工具 | 信息学奥赛选手的网页开发入门</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <style>
+        :root {
+            --html-color: #e34c26;
+            --css-color: #264de4;
+            --js-color: #f0db4f;
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --light: #f8f9fa;
+            --dark: #1a1a2e;
+            --gray: #6c757d;
+            --success: #4cc9f0;
+            --border-radius: 12px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(90deg, var(--dark), var(--secondary));
+            color: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "<HTML>";
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .html-icon {
+            color: var(--html-color);
+            font-size: 3.5rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            color: #a5b4fc;
+            margin-bottom: 20px;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 5px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        
+        .panel-header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-content {
+            padding: 0;
+            height: 500px;
+            overflow: hidden;
+        }
+        
+        /* 代码编辑器样式 */
+        .editor-container {
+            height: 100%;
+            position: relative;
+        }
+        
+        .CodeMirror {
+            height: 100%;
+            font-size: 14px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .editor-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        
+        .btn-success {
+            background: #06d6a0;
+        }
+        
+        .btn-success:hover {
+            background: #05b585;
+        }
+        
+        /* 预览面板样式 */
+        .preview-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .preview-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+            background: white;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        /* 教程内容样式 */
+        .tutorial-content {
+            padding: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .tutorial-section {
+            margin-bottom: 30px;
+        }
+        
+        .tutorial-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tutorial-section h3 i {
+            color: var(--html-color);
+        }
+        
+        .code-example {
+            background: #f8f9fa;
+            border-left: 4px solid var(--html-color);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        .code-example code {
+            color: var(--dark);
+            line-height: 1.5;
+        }
+        
+        .tag {
+            background: rgba(227, 76, 38, 0.1);
+            color: var(--html-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .attribute {
+            color: #d63384;
+            font-family: monospace;
+        }
+        
+        .value {
+            color: #0d6efd;
+            font-family: monospace;
+        }
+        
+        /* HTML元素库样式 */
+        .elements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .element-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px 15px;
+            text-align: center;
+            cursor: move;
+            transition: all 0.3s;
+        }
+        
+        .element-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .element-icon {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .element-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .element-tag {
+            font-family: monospace;
+            color: var(--html-color);
+            font-size: 0.9rem;
+        }
+        
+        /* 练习题目样式 */
+        .exercises-list {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .exercise-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .exercise-item h4 {
+            margin-bottom: 10px;
+            color: var(--dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .difficulty {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .difficulty.easy {
+            background: rgba(6, 214, 160, 0.2);
+            color: #06d6a0;
+        }
+        
+        .difficulty.medium {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .difficulty.hard {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+        
+        .exercise-desc {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .nav-tabs {
+                flex-direction: column;
+            }
+            
+            .panel-content {
+                height: 400px;
+            }
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            margin-top: 30px;
+        }
+        
+        /* 选项卡内容 */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>
+                    <i class="fab fa-html5 html-icon"></i>
+                    HTML学习工具
+                    <span style="font-size: 1.5rem; color: #a5b4fc;">| 信息学奥赛选手的网页开发入门</span>
+                </h1>
+                <p class="tagline">交互式学习HTML，掌握网页开发基础，为信息学奥赛中的Web题目做好准备</p>
+                
+                <div class="nav-tabs">
+                    <button class="tab-btn active" data-tab="tutorial">
+                        <i class="fas fa-graduation-cap"></i> HTML教程
+                    </button>
+                    <button class="tab-btn" data-tab="editor">
+                        <i class="fas fa-code"></i> 交互式编辑器
+                    </button>
+                    <button class="tab-btn" data-tab="elements">
+                        <i class="fas fa-th-large"></i> HTML元素库
+                    </button>
+                    <button class="tab-btn" data-tab="exercises">
+                        <i class="fas fa-pencil-alt"></i> 练习题目
+                    </button>
+                    <button class="tab-btn" data-tab="resources">
+                        <i class="fas fa-download"></i> 学习资源
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- HTML教程 -->
+        <div id="tutorial" class="tab-content active">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-graduation-cap"></i> HTML基础教程
+                    </h2>
+                    <div class="lesson-progress">
+                        <span>课程进度: </span>
+                        <span id="progress">15%</span>
+                        <div style="width: 200px; height: 10px; background: rgba(255,255,255,0.3); border-radius: 5px; display: inline-block; margin-left: 10px; vertical-align: middle;">
+                            <div style="width: 15%; height: 100%; background: #4cc9f0; border-radius: 5px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tutorial-content">
+                    <div class="tutorial-section">
+                        <h3><i class="fas fa-code"></i> 什么是HTML？</h3>
+                        <p>HTML（超文本标记语言）是构建网页的基础。它使用标签来描述网页的结构和内容。</p>
+                        <p>对于信息学奥赛选手来说，掌握HTML有助于理解Web技术，应对相关题目。</p>
+                        
+                        <div class="code-example">
+                            <code>
+                                <span class="tag">&lt;!DOCTYPE html&gt;</span><br>
+                                <span class="tag">&lt;html&gt;</span><br>
+                                &nbsp;&nbsp;<span class="tag">&lt;head&gt;</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;title&gt;</span>我的第一个网页<span class="tag">&lt;/title&gt;</span><br>
+                                &nbsp;&nbsp;<span class="tag">&lt;/head&gt;</span><br>
+                                &nbsp;&nbsp;<span class="tag">&lt;body&gt;</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;h1&gt;</span>欢迎来到我的网页<span class="tag">&lt;/h1&gt;</span><br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="tag">&lt;p&gt;</span>这是我的第一个HTML页面<span class="tag">&lt;/p&gt;</span><br>
+                                &nbsp;&nbsp;<span class="tag">&lt;/body&gt;</span><br>
+                                <span class="tag">&lt;/html&gt;</span>
+                            </code>
+                        </div>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h3><i class="fas fa-tags"></i> 常用HTML标签</h3>
+                        <p>以下是信息学奥赛中可能用到的基本HTML标签：</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li><span class="tag">&lt;h1&gt;</span> 到 <span class="tag">&lt;h6&gt;</span> - 标题标签</li>
+                            <li><span class="tag">&lt;p&gt;</span> - 段落标签</li>
+                            <li><span class="tag">&lt;a&gt;</span> - 超链接标签</li>
+                            <li><span class="tag">&lt;img&gt;</span> - 图像标签</li>
+                            <li><span class="tag">&lt;div&gt;</span> - 分区标签</li>
+                            <li><span class="tag">&lt;span&gt;</span> - 行内元素标签</li>
+                            <li><span class="tag">&lt;table&gt;</span> - 表格标签</li>
+                            <li><span class="tag">&lt;form&gt;</span> - 表单标签</li>
+                            <li><span class="tag">&lt;input&gt;</span> - 输入框标签</li>
+                            <li><span class="tag">&lt;button&gt;</span> - 按钮标签</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h3><i class="fas fa-link"></i> 链接和图像</h3>
+                        <p>在HTML中，使用 <span class="tag">&lt;a&gt;</span> 标签创建链接，使用 <span class="tag">&lt;img&gt;</span> 标签插入图像。</p>
+                        
+                        <div class="code-example">
+                            <code>
+                                <span class="comment">&lt;!-- 创建链接 --&gt;</span><br>
+                                <span class="tag">&lt;a</span> <span class="attribute">href=</span><span class="value">"https://www.noi.cn"</span><span class="tag">&gt;</span>NOI官网<span class="tag">&lt;/a&gt;</span><br><br>
+                                
+                                <span class="comment">&lt;!-- 插入图像 --&gt;</span><br>
+                                <span class="tag">&lt;img</span> <span class="attribute">src=</span><span class="value">"image.jpg"</span> <span class="attribute">alt=</span><span class="value">"描述文字"</span><span class="tag">&gt;</span>
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 交互式编辑器 -->
+        <div id="editor" class="tab-content">
+            <div class="main-content">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fas fa-code"></i> HTML编辑器
+                        </h2>
+                        <div class="editor-controls">
+                            <button class="btn" id="resetBtn">
+                                <i class="fas fa-redo"></i> 重置
+                            </button>
+                            <button class="btn btn-success" id="runBtn">
+                                <i class="fas fa-play"></i> 运行代码
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <span>index.html</span>
+                                <div class="editor-controls">
+                                    <button class="btn" id="saveBtn">
+                                        <i class="fas fa-save"></i> 保存
+                                    </button>
+                                    <button class="btn" id="exampleBtn">
+                                        <i class="fas fa-eye"></i> 查看示例
+                                    </button>
+                                </div>
+                            </div>
+                            <textarea id="htmlEditor" class="code-editor">
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的第一个HTML页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card h2 {
+            color: #4361ee;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #4361ee;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .btn {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            background: #3a0ca3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>信息学奥赛学习平台</h1>
+        <p>HTML/CSS/JavaScript 交互式学习工具</p>
+    </header>
+    
+    <div class="card">
+        <h2>HTML基础介绍</h2>
+        <p>HTML（超文本标记语言）是构建网页的基础。它使用标签来描述网页的结构和内容。</p>
+        <p>对于信息学奥赛选手来说，掌握HTML有助于理解Web技术，应对相关题目。</p>
+    </div>
+    
+    <div class="card">
+        <h2>常用HTML标签</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>标签</th>
+                    <th>描述</th>
+                    <th>示例</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>&lt;h1&gt; - &lt;h6&gt;</td>
+                    <td>标题标签</td>
+                    <td>&lt;h1&gt;标题&lt;/h1&gt;</td>
+                </tr>
+                <tr>
+                    <td>&lt;p&gt;</td>
+                    <td>段落标签</td>
+                    <td>&lt;p&gt;这是一个段落&lt;/p&gt;</td>
+                </tr>
+                <tr>
+                    <td>&lt;a&gt;</td>
+                    <td>超链接标签</td>
+                    <td>&lt;a href="#"&gt;链接&lt;/a&gt;</td>
+                </tr>
+                <tr>
+                    <td>&lt;img&gt;</td>
+                    <td>图像标签</td>
+                    <td>&lt;img src="image.jpg" alt="图片"&gt;</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card">
+        <h2>HTML练习</h2>
+        <p>尝试修改上面的代码，然后点击"运行代码"按钮查看效果。</p>
+        <button class="btn" onclick="showMessage()">点击我试试</button>
+        <p id="message" style="margin-top: 15px;"></p>
+    </div>
+    
+    <script>
+        function showMessage() {
+            document.getElementById('message').innerHTML = 
+                '恭喜！你已经成功运行了JavaScript代码！<br>继续学习HTML和JavaScript，你可以创建更复杂的交互效果。';
+        }
+    </script>
+</body>
+</html></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <i class="fas fa-eye"></i> 实时预览
+                        </h2>
+                        <div class="editor-controls">
+                            <button class="btn" id="fullscreenBtn">
+                                <i class="fas fa-expand"></i> 全屏
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-content">
+                        <div class="preview-container">
+                            <div class="preview-header">
+                                <span>预览结果</span>
+                                <span>大小: <span id="previewSize">自适应</span></span>
+                            </div>
+                            <iframe id="previewFrame" class="preview-frame"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- HTML元素库 -->
+        <div id="elements" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-th-large"></i> HTML元素库
+                    </h2>
+                    <p style="color: #a5b4fc;">拖动元素到编辑器中，或点击查看示例代码</p>
+                </div>
+                <div class="panel-content">
+                    <div class="elements-grid">
+                        <!-- 元素将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 练习题目 -->
+        <div id="exercises" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-pencil-alt"></i> HTML练习题目
+                    </h2>
+                    <div class="editor-controls">
+                        <button class="btn" id="randomExerciseBtn">
+                            <i class="fas fa-random"></i> 随机题目
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="exercises-list">
+                        <!-- 练习题目将通过JS动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 学习资源 -->
+        <div id="resources" class="tab-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <i class="fas fa-download"></i> HTML学习资源
+                    </h2>
+                </div>
+                <div class="tutorial-content">
+                    <div class="tutorial-section">
+                        <h3><i class="fas fa-book"></i> 推荐学习资料</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                <h4 style="color: #4361ee; margin-bottom: 10px;">MDN Web Docs</h4>
+                                <p>最权威的Web技术文档，包含HTML、CSS、JavaScript的完整参考。</p>
+                                <a href="https://developer.mozilla.org/zh-CN/docs/Web/HTML" target="_blank" style="color: #4361ee; text-decoration: none; font-weight: bold;">访问网站 →</a>
+                            </div>
+                            
+                            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                <h4 style="color: #4361ee; margin-bottom: 10px;">W3School 中文教程</h4>
+                                <p>简单易懂的HTML教程，适合初学者快速入门。</p>
+                                <a href="https://www.w3school.com.cn/html/index.asp" target="_blank" style="color: #4361ee; text-decoration: none; font-weight: bold;">访问网站 →</a>
+                            </div>
+                            
+                            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                <h4 style="color: #4361ee; margin-bottom: 10px;">信息学奥赛官方资源</h4>
+                                <p>NOI官网提供的学习资源和比赛信息。</p>
+                                <a href="https://www.noi.cn/" target="_blank" style="color: #4361ee; text-decoration: none; font-weight: bold;">访问网站 →</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="tutorial-section">
+                        <h3><i class="fas fa-file-download"></i> 下载练习文件</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                <h4 style="color: #4361ee; margin-bottom: 10px;">HTML基础练习包</h4>
+                                <p>包含10个HTML基础练习题和参考答案。</p>
+                                <button class="btn" style="margin-top: 10px; padding: 8px 15px; font-size: 0.9rem;" onclick="downloadResource('html_exercises.zip')">
+                                    <i class="fas fa-download"></i> 下载
+                                </button>
+                            </div>
+                            
+                            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                <h4 style="color: #4361ee; margin-bottom: 10px;">HTML+CSS综合项目</h4>
+                                <p>一个完整的小型网站项目，练习HTML和CSS结合使用。</p>
+                                <button class="btn" style="margin-top: 10px; padding: 8px 15px; font-size: 0.9rem;" onclick="downloadResource('html_css_project.zip')">
+                                    <i class="fas fa-download"></i> 下载
+                                </button>
+                            </div>
+                            
+                            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 10px;">
+                                <h4 style="color: #4361ee; margin-bottom: 10px;">信息学奥赛Web题集</h4>
+                                <p>历年信息学奥赛中与Web相关的题目集合。</p>
+                                <button class="btn" style="margin-top: 10px; padding: 8px 15px; font-size: 0.9rem;" onclick="downloadResource('oi_web_problems.pdf')">
+                                    <i class="fas fa-download"></i> 下载
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>HTML学习工具 &copy; 2023 | 专为信息学奥赛选手设计 | 本工具在浏览器中运行，无需安装</p>
+            <p style="margin-top: 10px;">提示：所有代码编辑和预览都在本地进行，确保数据安全</p>
+        </footer>
+    </div>
+
+    <!-- CodeMirror库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    
+    <script>
+        // 初始化CodeMirror编辑器
+        const editor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
+            lineNumbers: true,
+            mode: "htmlmixed",
+            theme: "dracula",
+            indentUnit: 4,
+            matchBrackets: true,
+            autoCloseBrackets: true,
+            lineWrapping: true
+        });
+        
+        // 设置编辑器初始大小
+        editor.setSize("100%", "400px");
+        
+        // 选项卡切换
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有active类
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // 添加active类到当前选项卡
+                btn.classList.add('active');
+                const tabId = btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // 如果切换到编辑器选项卡，刷新预览
+                if (tabId === 'editor') {
+                    updatePreview();
+                }
+            });
+        });
+        
+        // 更新预览
+        function updatePreview() {
+            const previewFrame = document.getElementById('previewFrame');
+            const htmlCode = editor.getValue();
+            
+            // 创建完整的HTML文档
+            const fullHtml = htmlCode;
+            
+            // 将HTML代码写入iframe
+            previewFrame.contentDocument.open();
+            previewFrame.contentDocument.write(fullHtml);
+            previewFrame.contentDocument.close();
+        }
+        
+        // 运行代码按钮
+        document.getElementById('runBtn').addEventListener('click', updatePreview);
+        
+        // 重置代码按钮
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            const defaultCode = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的HTML页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #4361ee;
+        }
+        p {
+            color: #333;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>欢迎来到HTML学习工具</h1>
+    <p>这是一个简单的HTML页面。尝试修改代码并查看实时预览。</p>
+    <p>当前时间: <span id="time"></span></p>
+    
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString();
+    <\/script>
+</body>
+</html>`;
+            
+            editor.setValue(defaultCode);
+            updatePreview();
+        });
+        
+        // 查看示例按钮
+        document.getElementById('exampleBtn').addEventListener('click', function() {
+            const exampleCode = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信息学奥赛学习卡片</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card-header {
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+            color: white;
+            padding: 25px;
+        }
+        
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .card-body {
+            padding: 25px;
+        }
+        
+        .card-body p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .tag {
+            display: inline-block;
+            background: rgba(67, 97, 238, 0.1);
+            color: #4361ee;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .btn {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #3a0ca3;
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card">
+            <div class="card-header">
+                <h2>HTML基础</h2>
+            </div>
+            <div class="card-body">
+                <p>HTML是构建网页的基础，由一系列标签组成，用于定义网页内容的结构和语义。</p>
+                <div>
+                    <span class="tag">&lt;html&gt;</span>
+                    <span class="tag">&lt;head&gt;</span>
+                    <span class="tag">&lt;body&gt;</span>
+                    <span class="tag">&lt;div&gt;</span>
+                    <span class="tag">&lt;p&gt;</span>
+                    <span class="tag">&lt;a&gt;</span>
+                </div>
+                <button class="btn" onclick="alert('HTML是网页的骨架！')">学习更多</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>CSS样式</h2>
+            </div>
+            <div class="card-body">
+                <p>CSS用于控制网页的外观和布局，包括颜色、字体、间距、响应式设计等。</p>
+                <div>
+                    <span class="tag">color</span>
+                    <span class="tag">font-size</span>
+                    <span class="tag">margin</span>
+                    <span class="tag">padding</span>
+                    <span class="tag">flexbox</span>
+                    <span class="tag">grid</span>
+                </div>
+                <button class="btn" onclick="alert('CSS是网页的皮肤和衣服！')">学习更多</button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>JavaScript交互</h2>
+            </div>
+            <div class="card-body">
+                <p>JavaScript为网页添加交互功能，如表单验证、动画效果、数据获取和动态内容更新。</p>
+                <div>
+                    <span class="tag">function</span>
+                    <span class="tag">event</span>
+                    <span class="tag">DOM</span>
+                    <span class="tag">API</span>
+                    <span class="tag">JSON</span>
+                    <span class="tag">async</span>
+                </div>
+                <button class="btn" onclick="alert('JavaScript是网页的大脑！')">学习更多</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log('欢迎学习Web开发！');
+    <\/script>
+</body>
+</html>`;
+            
+            editor.setValue(exampleCode);
+            updatePreview();
+        });
+        
+        // 全屏预览按钮
+        document.getElementById('fullscreenBtn').addEventListener('click', function() {
+            const previewFrame = document.getElementById('previewFrame');
+            if (previewFrame.requestFullscreen) {
+                previewFrame.requestFullscreen();
+            } else if (previewFrame.webkitRequestFullscreen) {
+                previewFrame.webkitRequestFullscreen();
+            } else if (previewFrame.msRequestFullscreen) {
+                previewFrame.msRequestFullscreen();
+            }
+        });
+        
+        // 保存代码按钮
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const htmlCode = editor.getValue();
+            const blob = new Blob([htmlCode], {type: "text/html"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "my_html_page.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert("HTML文件已保存！");
+        });
+        
+        // 初始化HTML元素库
+        function initElementsLibrary() {
+            const elementsGrid = document.querySelector('.elements-grid');
+            const elements = [
+                {name: "标题", tag: "<h1></h1>", icon: "fas fa-heading", desc: "标题标签，h1-h6表示不同级别"},
+                {name: "段落", tag: "<p></p>", icon: "fas fa-paragraph", desc: "段落标签"},
+                {name: "链接", tag: '<a href="#"></a>', icon: "fas fa-link", desc: "超链接标签"},
+                {name: "图像", tag: '<img src="" alt="">', icon: "fas fa-image", desc: "图像标签"},
+                {name: "按钮", tag: "<button></button>", icon: "fas fa-square", desc: "按钮标签"},
+                {name: "输入框", tag: '<input type="text">', icon: "fas fa-edit", desc: "输入框标签"},
+                {name: "表单", tag: "<form></form>", icon: "fas fa-list-alt", desc: "表单标签"},
+                {name: "列表", tag: "<ul><li></li></ul>", icon: "fas fa-list", desc: "无序列表"},
+                {name: "表格", tag: "<table><tr><td></td></tr></table>", icon: "fas fa-table", desc: "表格标签"},
+                {name: "分区", tag: "<div></div>", icon: "fas fa-square-full", desc: "分区标签"},
+                {name: "行内", tag: "<span></span>", icon: "fas fa-minus", desc: "行内元素标签"},
+                {name: "换行", tag: "<br>", icon: "fas fa-level-down-alt", desc: "换行标签"},
+            ];
+            
+            elements.forEach(element => {
+                const elementCard = document.createElement('div');
+                elementCard.className = 'element-card';
+                elementCard.setAttribute('draggable', 'true');
+                elementCard.innerHTML = `
+                    <div class="element-icon"><i class="${element.icon}"></i></div>
+                    <div class="element-name">${element.name}</div>
+                    <div class="element-tag">${element.tag}</div>
+                `;
+                
+                // 添加点击事件，将元素插入编辑器
+                elementCard.addEventListener('click', function() {
+                    const cursor = editor.getCursor();
+                    editor.replaceRange(element.tag, cursor);
+                    
+                    // 显示提示
+                    showNotification(`已插入 ${element.name} 标签`);
+                });
+                
+                // 添加拖动事件
+                elementCard.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', element.tag);
+                });
+                
+                elementsGrid.appendChild(elementCard);
+            });
+            
+            // 允许编辑器接收拖放
+            editor.getWrapperElement().addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            });
+            
+            editor.getWrapperElement().addEventListener('drop', function(e) {
+                e.preventDefault();
+                const data = e.dataTransfer.getData('text/plain');
+                const cursor = editor.getCursor();
+                editor.replaceRange(data, cursor);
+                
+                showNotification('标签已插入到编辑器中');
+            });
+        }
+        
+        // 初始化练习题目
+        function initExercises() {
+            const exercisesList = document.querySelector('.exercises-list');
+            const exercises = [
+                {
+                    title: "创建个人简介页面",
+                    difficulty: "easy",
+                    description: "使用HTML创建一个简单的个人简介页面，包含姓名、照片、简介和联系方式。",
+                    hint: "使用h1、p、img、ul等标签"
+                },
+                {
+                    title: "制作课程表",
+                    difficulty: "medium",
+                    description: "创建一个课程表，使用table标签展示一周的课程安排，包含时间、课程名称和教室。",
+                    hint: "使用table、tr、th、td标签，可以添加CSS样式美化"
+                },
+                {
+                    title: "构建注册表单",
+                    difficulty: "medium",
+                    description: "创建一个用户注册表单，包含用户名、密码、邮箱、性别选择和提交按钮。",
+                    hint: "使用form、input、label、select、button标签"
+                },
+                {
+                    title: "信息学奥赛题目展示页",
+                    difficulty: "hard",
+                    description: "创建一个展示信息学奥赛题目的页面，包含题目列表、难度标签和详情展示区域。",
+                    hint: "使用div布局，结合JavaScript实现交互功能"
+                },
+                {
+                    title: "响应式导航栏",
+                    difficulty: "hard",
+                    description: "创建一个响应式导航栏，在桌面端显示水平菜单，在移动端显示汉堡菜单。",
+                    hint: "使用ul、li、a标签，结合CSS媒体查询和JavaScript"
+                }
+            ];
+            
+            exercises.forEach((exercise, index) => {
+                const exerciseItem = document.createElement('div');
+                exerciseItem.className = 'exercise-item';
+                exerciseItem.innerHTML = `
+                    <h4>
+                        <span>练习 ${index + 1}: ${exercise.title}</span>
+                        <span class="difficulty ${exercise.difficulty}">${getDifficultyText(exercise.difficulty)}</span>
+                    </h4>
+                    <div class="exercise-desc">${exercise.description}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #4361ee; font-size: 0.9rem;"><i class="fas fa-lightbulb"></i> 提示: ${exercise.hint}</span>
+                        <button class="btn" style="padding: 8px 15px; font-size: 0.9rem;" onclick="loadExercise(${index})">
+                            <i class="fas fa-code"></i> 加载题目
+                        </button>
+                    </div>
+                `;
+                
+                exercisesList.appendChild(exerciseItem);
+            });
+        }
+        
+        function getDifficultyText(level) {
+            switch(level) {
+                case 'easy': return '简单';
+                case 'medium': return '中等';
+                case 'hard': return '困难';
+                default: return '未知';
+            }
+        }
+        
+        // 加载练习题目到编辑器
+        function loadExercise(index) {
+            const exercises = [
+                `<!-- 练习1: 创建个人简介页面 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的个人简介</title>
+    <style>
+        /* 在这里添加CSS样式 */
+    </style>
+</head>
+<body>
+    <!-- 在这里编写HTML代码 -->
+    <h1>个人简介</h1>
+</body>
+</html>`,
+                `<!-- 练习2: 制作课程表 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的课程表</title>
+    <style>
+        /* 在这里添加CSS样式 */
+    </style>
+</head>
+<body>
+    <!-- 在这里编写HTML代码 -->
+    <h1>课程表</h1>
+</body>
+</html>`,
+                `<!-- 练习3: 构建注册表单 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册</title>
+    <style>
+        /* 在这里添加CSS样式 */
+    </style>
+</head>
+<body>
+    <!-- 在这里编写HTML代码 -->
+    <h1>用户注册</h1>
+</body>
+</html>`,
+                `<!-- 练习4: 信息学奥赛题目展示页 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>信息学奥赛题目</title>
+    <style>
+        /* 在这里添加CSS样式 */
+    </style>
+</head>
+<body>
+    <!-- 在这里编写HTML代码 -->
+    <h1>信息学奥赛题目</h1>
+</body>
+</html>`,
+                `<!-- 练习5: 响应式导航栏 -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>响应式导航栏</title>
+    <style>
+        /* 在这里添加CSS样式 */
+    </style>
+</head>
+<body>
+    <!-- 在这里编写HTML代码 -->
+    <h1>导航栏</h1>
+</body>
+</html>`
+            ];
+            
+            if (index >= 0 && index < exercises.length) {
+                editor.setValue(exercises[index]);
+                updatePreview();
+                showNotification(`已加载练习 ${index + 1}`);
+                
+                // 切换到编辑器选项卡
+                document.querySelector('[data-tab="editor"]').click();
+            }
+        }
+        
+        // 随机题目按钮
+        document.getElementById('randomExerciseBtn').addEventListener('click', function() {
+            const randomIndex = Math.floor(Math.random() * 5);
+            loadExercise(randomIndex);
+        });
+        
+        // 下载资源函数
+        function downloadResource(filename) {
+            showNotification(`开始下载: ${filename}`);
+            // 实际应用中这里会链接到真实文件
+            // 这里只是模拟下载
+        }
+        
+        // 显示通知
+        function showNotification(message) {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4361ee;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                animation: slideIn 0.3s, fadeOut 0.3s 2.7s;
+            `;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes fadeOut {
+                    from { opacity: 1; }
+                    to { opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            // 3秒后移除通知
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 3000);
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            // 初始化元素库和练习题目
+            initElementsLibrary();
+            initExercises();
+            
+            // 初始预览
+            updatePreview();
+            
+            // 设置进度
+            const progress = Math.floor(Math.random() * 30) + 10;
+            document.getElementById('progress').textContent = `${progress}%`;
+        });
+    </script>
+</body>
+</html>
